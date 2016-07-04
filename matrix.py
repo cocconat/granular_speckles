@@ -22,15 +22,15 @@ def timeit(method):
               (method.__name__, args, kw, te-ts)
         return result
 
-    return timed 
-    
-        
-        
+    return timed
+
+
+
 def spaceAveragedCorr(time,arrays):
     notNone=(array for array in arrays if array.all())
     correlationList=np.stack(notNone,axis=0)
     return np.mean(correlationList,axis=0)
-            
+
 
 def pixelStory(mat,raw,col):
     return mat[raw,col,:]
@@ -53,7 +53,7 @@ def plotStory(mat,raw,col,plt):
     plt.scatter(range(mat.shape[2]),mat[raw,col,:])
     plt.xlim(0,mat.shape[2])
     #plt.ylim(np.min(self.mat),np.max(self.mat))
-    
+
     return plt
 
 def plotFrame(frame,plt,matrix=None):
@@ -62,7 +62,7 @@ def plotFrame(frame,plt,matrix=None):
     '''
     plot=Image.fromarray(matrix[:,:,frame])
     return plt
-    
+
 def histogram(self,raw,col,plt,mat,distribution=None,bins=10):
     '''
     plot the distribution of values of pixel along time evolution
@@ -81,7 +81,7 @@ def histogram(self,raw,col,plt,mat,distribution=None,bins=10):
 
 def timeVariance(mat):
     return np.var(mat,axis=2)
-    
+
 def frame(mat,time):
     return mat[:,:,time]
 
@@ -104,7 +104,7 @@ def correlate(array,shift):
 def single_correlation(time,mat,position):
 	raw,col=position
 	timepixel=mat[raw,col,:]
-	#var=np.var(timepixel)            
+	#var=np.var(timepixel)
 	mean=np.mean(timepixel)
 	var=np.var(timepixel)
 	if var > 100:
@@ -124,9 +124,9 @@ def correlation(time,mat):
     hmat=mat.shape[0]
     lmat=mat.shape[1]
     #correlationMatrix=np.zeros(self.mat.shape)
- 
+
     pool=multiprocessing.Pool(processes=5)
-    print "start correlation stack" 
+    print "start correlation stack"
     coupleIter= itertools.product(range(mat.shape[0]),range(mat.shape[1]))
     f=partial(single_correlation,time,mat)
     arrays=pool.map(f,coupleIter)
@@ -134,29 +134,29 @@ def correlation(time,mat):
 #        for i in range(self.mat.shape[0]):
 #            a.append([self.single_correlation(i,j,time) for j in range(self.mat.shape[1])]):
 #                print "sono al pixel {} {} di {}".format(i,j,self.mat.shape)
-#                a.append(self.single_correlation(i,j,time))         
+#                a.append(self.single_correlation(i,j,time))
     corrMatrix=np.stack(arrays,axis=0).reshape(hmat,lmat,int(time))
-    print "end correlation stack" 
+    print "end correlation stack"
     return corrMatrix, np.nan_to_num(spaceAveragedCorr(time,arrays))
 
-        
-class GetMatrix(object): 
+
+class GetMatrix(object):
     def __init__(self,args):
-        ''' 
-        you need this class to import image, 
-        it process and give you a 3 dimensional array, 
+        '''
+        you need this class to import image,
+        it process and give you a 3 dimensional array,
         2d-space and time
         '''
         self.folder=args.image_folder
         self.black=args.black
         self.mat=None
-                
+
     def importImages(self):
         for fname in sorted(os.listdir(os.getcwd()+"/"+self.folder)):
             if fname.endswith(".png"):
 		print fname
                 yield os.path.join(os.getcwd()+"/"+self.folder, fname)
-    
+
     @staticmethod
     def treesholdMatrix(matrix):
         '''
@@ -168,9 +168,9 @@ class GetMatrix(object):
         return matrix
 
 
-    @staticmethod             
+    @staticmethod
     def imagesToArray(image_path):
-        return smc.imread(image_path, flatten=False, mode='L')
+        return smc.imread(image_path, flatten=True)
 
 
     @property
@@ -178,16 +178,16 @@ class GetMatrix(object):
         '''
         this is your matrix!!
         '''
-        
+
         if self.mat==None:
             self.mat= self.stackImages()
-        
+
         if self.black:
             self.mat=self.treesholdMatrix(self.mat)
         #self.normalize()
         return self.mat
-    
-    @timeit        
+
+    @timeit
     def stackImages(self):
         for num, image in enumerate(self.importImages()):
             if num==0:
@@ -195,9 +195,9 @@ class GetMatrix(object):
             else:
                 array=np.dstack((array,self.imagesToArray(image)))
         return 255-array
-    
+
     def normalize(self):
         self.mat=self.mat/np.max(self.mat)
-        
-        
-    
+
+
+
