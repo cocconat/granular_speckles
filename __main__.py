@@ -10,7 +10,7 @@ from matrix import GetMatrix
 from coarsing import *
 from matplotlib.pyplot import plot, ion, show
 from matplotlib import pyplot as plt
-import subprocess
+from video import *
 
 def getParser():
     import argparse
@@ -25,23 +25,12 @@ def getParser():
     ap.add_argument("-i", "--file_import", help = "folder for png images to process",action="store_true")
     ap.add_argument("-T", "--timecoarse", help = "time carsing and sigma analysis",action="store_true")
     ap.add_argument("-S", "--spacecoarse", help = "space coarsing and correlation matrix",action="store_true")
+    ap.add_argument("-v", "--videofile",help ="path for video file, long time required")
 
-    
+
     return ap
-    
-ion()
 
-def get_frame_rate(filename):
-    if not os.path.exists(filename):
-        sys.stderr.write("ERROR: filename %r was not found!" % (filename,))
-        return -1         
-    out = subprocess.check_output(["ffprobe",filename,"-v","0","-select_streams","v","-print_format","flat","-show_entries","stream=r_frame_rate"])
-    rate = out.split('=')[1].strip()[1:-1].split('/')
-    if len(rate)==1:
-        return float(rate[0])
-    if len(rate)==2:
-        return float(rate[0])/float(rate[1])
-    return -1
+ion()
 
 def timeit(method):
     '''this decorator measures operation time'''
@@ -54,7 +43,7 @@ def timeit(method):
         print '%r (%r, %r) %2.2f sec' % \
               (method.__name__, args, kw, te-ts)
         return result
-    return timed 
+    return timed
 
 
 def explore(time_serie,start_col=0,start_raw=0,end_col=None,end_raw=None,pause=0):
@@ -80,7 +69,7 @@ def explore(time_serie,start_col=0,start_raw=0,end_col=None,end_raw=None,pause=0
                 plt.clf()
             else:
                 func(i,j)
-                
+
 def explore_time(time_serie,pause=0):
     '''explore time is a'''
     array=time_serie
@@ -91,21 +80,21 @@ def explore_time(time_serie,pause=0):
             plt.pcolor(array[:,:,i])
             plt.pause(pause)
             plt.clf()
-            
+
 #    plt.figure(1)
     #plt.annotate(" average is {}".format(center), xy=(0.5, 0.5), xycoords='axes fraction',
              #horizontalalignment='center', verticalalignment='center')
 
 def timeDecorrelation(time_serie,path,args):
     if len(args)==1:
-        args=a  
+        args=a
         rgs[0]
     results=[coarseTime(time_serie,block) for block in args]
     deco=   [np.mean(TimeVariance(result)) for result in results]
     for enum, result in enumerate(results):
     	np.save(path+"/timeCooarse_"+str(enum), result)
     np.savetxt(path+"/time_deco.dat", deco)
- 
+
 #   coarseTime
 def space(block_size,time_serie):
     time_serie=coarseSpace(time_serie,block_size)
@@ -123,19 +112,22 @@ def blockIteration(timeserie,*args):
     if len(args)==1:
         args=args[0]
     for block in args:
-        yield block,coarseSpace(block,timeserie)    
+        yield block,coarseSpace(block,timeserie)
 
 
 
 def main():
     args=getParser().parse_args()
-    time_serie=None 
+    time_serie=None
+    if not args.videofile==None:
+        print "video frame is: ", get_frame_rate(args)
+        print "so many frame {} to folder {}".format(videoToFrame(args),args.image_folder)
 
     if args.file_import:
         time_serie=np.load(args.image_folder+"/image_matrix"+".npy")
         if not time_serie==None :
             print "IMAGE-MATRIX  HAS BEEN CORRECTLY uploaded"
-        else: 
+        else:
             raise "not correctly uploaded!!!"
     else:
         print "image acquisition in process..."
@@ -143,29 +135,29 @@ def main():
         np.save(args.image_folder+"/image_matrix",time_serie)
         print "the starting matrix has shapes: {}".format(time_serie.shape)
 
-    
+
     if args.takealook:
         #varianceMatrix=timeVariance(time_serie)
         #print "la somma della varianza della matrice di input e' {}".format(varianceMatrix.mean())
         explore_time(time_serie,pause=0.00001)
-    
+
     mymatrix=time_serie
-    
-    #plotMatrix(varianceMatrix)    
+
+    #plotMatrix(varianceMatrix)
     #time_serie.plotFrame(19)
     #time_serie.plotFrame(frame=21,plt=plt).show()
     #explore(new_time_serie,'histogram',pause=0.00001)
     #explore(new_time_serie,'histogram',85,60,150,80,pause=0.00001)
 
-    
+
     if not args.block_size:
-	block_size=str(1)          
+	block_size=str(1)
     else: block_size=args.block_size
 
     resultPath="results"+"/"+args.image_folder
     if not os.path.exists(resultPath):
     	os.makedirs(resultPath)
-    
+
     if args.timecoarse:
        #saving time decorrelation matrix
         mymatrix=coarseSpace(time_serie,2)
@@ -179,10 +171,10 @@ def main():
             np.savetxt(resultPath+"/spaceAverage_"+str(block)+".dat", spaceAverage)
 
     if args.block_size:
-    	mymatrix,timeV,spaceV=coarseSpace(int(block_size),mymatrix)	
+    	mymatrix,timeV,spaceV=coarseSpace(int(block_size),mymatrix)
     if args.matrix_story:
         explore_time(new_time_serie,'plotFrame',pause=0.00001)
-    
+
     if args.correlation:
         full_core,all_together=correlation(int(args.correlation),mymatrix)
         #plt.plot(range(len(all_togheter)),all_togheter)
@@ -194,18 +186,18 @@ def main():
         if not os.path.exists(togePath):
             os.makedirs(togePath)
         np.save(fullPath+block_size,full_core)
-        np.save(togePath+block_size,all_together)	 
-  
+        np.save(togePath+block_size,all_together)
+
     #lista=new_time_serie.single_correlation(50,15,50)
-    globals().update(locals())    
+    globals().update(locals())
 
 #    explore(new_time_serie,0.00001)
 if __name__=="__main__":
         main()
 
-    
-    
-    
-   
+
+
+
+
 
 
