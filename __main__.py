@@ -6,7 +6,6 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from matrix import *
-from matrix import GetMatrix
 from coarsing import *
 from matplotlib.pyplot import plot, ion, show
 from video import *

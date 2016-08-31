@@ -1,6 +1,5 @@
 import math
 import scipy
-import utils
 import numpy as np
 import sys,os
 from scipy import misc as smc
