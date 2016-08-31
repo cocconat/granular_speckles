@@ -1,5 +1,6 @@
 import math
 import scipy
+import utils
 import numpy as np
 import sys,os
 from scipy import misc as smc
@@ -154,7 +155,7 @@ class GetMatrix(object):
     def importImages(self):
         for fname in sorted(os.listdir(os.getcwd()+"/"+self.folder)):
             if fname.endswith(".png"):
-		print fname
+                print fname
                 yield os.path.join(os.getcwd()+"/"+self.folder, fname)
 
     @staticmethod
@@ -189,12 +190,14 @@ class GetMatrix(object):
 
     @timeit
     def stackImages(self):
-        for num, image in enumerate(self.importImages()):
-            if num==0:
-                array=self.imagesToArray(image)
-            else:
-                array=np.dstack((array,self.imagesToArray(image)))
-        return 255-array
+        firstImage=self.imagesToArray(self.importImages().next())
+        matShape=firstImage.shape[0],firstImage.shape[1],len(os.listdir(os.getcwd()+"/"+self.folder))
+        print matShape
+        array=np.zeros(matShape)
+        array[:,:,0]=firstImage
+        for count, image in enumerate(self.importImages()):
+            array[:,:,count+1]=self.imagesToArray(image)
+        return array[:,:,:count+1]
 
     def normalize(self):
         self.mat=self.mat/np.max(self.mat)

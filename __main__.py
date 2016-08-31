@@ -1,20 +1,19 @@
 #!/usr/bin/python2.7
-import math
-import scipy
-
+'''
+trhda
+'''
 import numpy as np
-import sys,os
+import os
 import matplotlib.pyplot as plt
 from matrix import *
 from matrix import GetMatrix
 from coarsing import *
 from matplotlib.pyplot import plot, ion, show
-from matplotlib import pyplot as plt
 from video import *
 
 def getParser():
     import argparse
-    ap = argparse.ArgumentParser("twrite me a documentation!!!")
+    ap = argparse.ArgumentParser("this program measure the correlation of a many frame video, then its  possible to performa a coarse graining over time or space dimension, it's a 2d project but it can be easily performed in 3d with little modification. \nThe algorithm implemented are top level for each stage and standard is parallelized over 5 procs. \n Needed library is Numpy, Scipy, multiprocessing , matplotlib, if you want to frame the video also opencv2 is needed")
     ap.add_argument("-bn", "--black", help="set black and white or greys",
                     action="store_true")
     ap.add_argument("-f", "--image_folder", help = "folder for png images to process")
@@ -25,9 +24,7 @@ def getParser():
     ap.add_argument("-i", "--file_import", help = "folder for png images to process",action="store_true")
     ap.add_argument("-T", "--timecoarse", help = "time carsing and sigma analysis",action="store_true")
     ap.add_argument("-S", "--spacecoarse", help = "space coarsing and correlation matrix",action="store_true")
-    ap.add_argument("-v", "--videofile",help ="path for video file, long time required")
-
-
+    ap.add_argument("-v", "--videofile", help ="path for video file, long time required")
     return ap
 
 ion()

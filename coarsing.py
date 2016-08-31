@@ -19,22 +19,23 @@ def timeit(method):
               (method.__name__, args, kw, te-ts)
         return result
 
-    return timed 
+    return timed
 
 def coarsetool_time(matrix,L,t,pos):
 	return np.array([np.mean(matrix[pos[0],pos[1],i:i+L]) for i in xrange(t/L)])
 
-@timeit    
-def coarseTime(timeserie,block_size): 
-	'''
-	coarsening over time of a time serie
-	'''
-	h,w,t=timeserie.shape
-	coupleIter=itertools.product(xrange(h),xrange(w))
-	print "time coarsed matrix shape: {}, block size: {}".format((h,w,t/block_size), block_size)
-	pool = multiprocessing.Pool(processes=5)
-	f=partial(coarsetool_time,timeserie,block_size,t)
-	return np.stack(pool.map(f,coupleIter)).reshape(h,w,t/block_size)
+@timeit
+def coarseTime(timeserie,block_size):
+
+    """
+    coarsening over time of a time serie
+    """
+    h,w,t=timeserie.shape
+    coupleiter=itertools.product(xrange(h),xrange(w))
+    print "time coarsed matrix shape: {}, block size: {}".format((h,w,t/block_size), block_size)
+    pool = multiprocessing.Pool(processes=5)
+    f=partial(coarsetool_time,timeserie,block_size,t)
+    return np.stack(pool.map(f,coupleiter)).reshape(h,w,t/block_size)
 
 def test_speed(self):
 	second=self.parallelReducedTime()
@@ -44,8 +45,7 @@ def test_speed(self):
 
 @timeit
 def coarseSpace(timeserie,block_size):
-	'''  
-	non funziona!!!
+	'''
 	coarsening over a time series matrix
 	'''
 	Coarser=CoarseMatrix(block_size,tuple(timeserie.shape[:-1]))
@@ -60,8 +60,8 @@ def coarseSpace(timeserie,block_size):
 
 def coarsetool(coarser,matrix,time):
 	return coarser.coarseMatrix(matrix[:,:,time])
-    
-        
+
+
 class CoarseMatrix(object) :
     def __init__(self,block_size,shape):
         self.matrix=None
@@ -72,7 +72,7 @@ class CoarseMatrix(object) :
         self.initResize()
         self.rightR=self.rightReducer(self.wnew*block_size,self.block_size)
         self.leftR=self.rightReducer(self.hnew*block_size, self.block_size).transpose()
-	
+
     def initResize(self):
         '''
         reduce the matrix to multiple of block_size
@@ -81,7 +81,7 @@ class CoarseMatrix(object) :
         #print "Attenzione le dimensione della matrice e' ridotta di {}, le nuove dimensioni sono {}".format([self.matrix.shape[0]-newsize[0]*self.block_size for i in [0,1]], newsize)
         self.hnew=int(newsize[0])
         self.wnew=int(newsize[1])
-   
+
     def resizeMatrix(self):
         self.matrix=self.matrix[:self.hnew*self.block_size,:self.wnew*self.block_size]
 
@@ -94,7 +94,7 @@ class CoarseMatrix(object) :
 	if self.shape != matrix.shape:
 	    raise "not right dimension matrix!"
         return self.matrixReduction()
-    
+
     @staticmethod
     def rightReducer(elems,L):
         a=np.zeros((elems,elems/L),int)
@@ -112,8 +112,8 @@ class CoarseMatrix(object) :
 	the size of final matrix
 	'''
 	self.resizeMatrix()
-	return np.dot(np.dot(self.leftR,self.matrix),self.rightR)/self.block_size/self.block_size      
- 
+	return np.dot(np.dot(self.leftR,self.matrix),self.rightR)/self.block_size/self.block_size
+
     def reduced(self):
         '''
         this function reduce the matrix, not userfriendly!
@@ -125,13 +125,13 @@ class CoarseMatrix(object) :
                 reduced=self.matrix[i*L:(i+1)*L,j*L:(j+1)*L]
                 yield i,j,np.sum(reduced)/L/L
 	#TimeSerie.variance(reduced)
-    
+
         newarray=np.zeros((self.hnew,self.wnew))
         for i,j,submatrix in block_iterator(self):
             newarray[i,j]=submatrix
         self.newarray=newarray
         return newarray
-        
-            
+
+
 
 
