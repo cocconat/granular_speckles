@@ -16,7 +16,7 @@ def getParser():
     ap.add_argument("-bn", "--black", help="set black and white or greys",
                     action="store_true")
     ap.add_argument("-f", "--image_folder", help = "folder for png images to process")
-    ap.add_argument("-b", "--block_size", help = "apply coarse graining, this is dimension for image reduction")
+    ap.add_argument("-b", "--block_size",help = "apply coarse graining, this is dimension for image reduction")
     ap.add_argument("-m", "--matrix_story", help = "colorful image for pixel evolution",action="store_true")
     ap.add_argument("-c", "--correlation", help = "measure the time correlation for each pixel of final matrix")
     ap.add_argument("-t", "--takealook", help = "colorful image for pixel evolution",action="store_true")
@@ -166,8 +166,6 @@ def main():
             full_core, spaceAverage=correlation(int(corrtime),reducedSerie)
             np.savetxt(resultPath+"/spaceAverage_"+str(block)+".dat", spaceAverage)
 
-    if args.block_size:
-    	mymatrix,timeV,spaceV=coarseSpace(int(block_size),mymatrix)
     if args.matrix_story:
         explore_time(new_time_serie,'plotFrame',pause=0.00001)
 
@@ -175,8 +173,8 @@ def main():
         full_core,all_together=correlation(int(args.correlation),mymatrix)
         #plt.plot(range(len(all_togheter)),all_togheter)
         #time_serie.plotStory(80,120,pause=20)
-        fullPath="matrix/"+args.image_folder+"/full_correlation/"
-        togePath="matrix/"+args.image_folder+"/all_together/"
+        fullPath="results/"+args.image_folder+"/full_correlation/"
+        togePath="results/"+args.image_folder+"/all_together/"
         if not os.path.exists(fullPath):
             os.makedirs(fullPath)
         if not os.path.exists(togePath):

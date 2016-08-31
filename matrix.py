@@ -26,10 +26,8 @@ def timeit(method):
 
 
 
-def spaceAveragedCorr(time,arrays):
-    notNone=(array for array in arrays if array.all())
-    correlationList=np.stack(notNone,axis=0)
-    return np.mean(correlationList,axis=0)
+def spaceAveragedCorr(a):
+    return np.mean(a[:,:,np.nonzero(a)[2]],axis=2)
 
 
 def pixelStory(mat,raw,col):
@@ -135,9 +133,12 @@ def correlation(time,mat):
 #            a.append([self.single_correlation(i,j,time) for j in range(self.mat.shape[1])]):
 #                print "sono al pixel {} {} di {}".format(i,j,self.mat.shape)
 #                a.append(self.single_correlation(i,j,time))
-    corrMatrix=np.stack(arrays,axis=0).reshape(hmat,lmat,int(time))
+    corrMatrix=np.zeros((hmat,lmat,int(time)))
+    coupleIter= itertools.product(range(mat.shape[0]),range(mat.shape[1]))
+    for r,c in coupleIter:
+        corrMatrix[r,c,:]=arrays.pop(0)
     print "end correlation stack"
-    return corrMatrix, np.nan_to_num(spaceAveragedCorr(time,arrays))
+    return corrMatrix, np.nan_to_num(spaceAveragedCorr(corrMatrix))
 
 
 class GetMatrix(object):
