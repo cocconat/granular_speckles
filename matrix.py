@@ -23,8 +23,18 @@ def timeit(method):
 
 
 
-def spaceAveragedCorr(a):
-    return np.mean(a[:,:,np.nonzero(a)[2]],axis=2)
+def spaceAveragedCorr(mat):
+    def non_zero_iter(a):
+        for b in range(mat.shape[1]):
+            if np.mean(mat[a,b,:])!=0:
+                yield mat[a,b,:]
+    myarray=np.zeros((mat.shape[0],mat.shape[2]))
+    for a in range (mat.shape[0]):
+        myarray[a,:]=np.mean(np.array([c for c in non_zero_iter(a)]),axis=0)
+    print "#######################",mat.shape,myarray.shape
+
+    return myarray
+
 
 
 def pixelStory(mat,raw,col):
@@ -137,6 +147,7 @@ class GetMatrix(object):
         self.folder=args.image_folder
         self.black=args.black
         self.mat=None
+        self.resize=args.resize
 
     def importImages(self):
         for fname in sorted(os.listdir(os.getcwd()+"/"+self.folder)):
@@ -157,9 +168,17 @@ class GetMatrix(object):
 
 
     @staticmethod
-    def imagesToArray(image_path):
-        return smc.imread(image_path, flatten=True)
+    def plotOne(image_path):
+        image=smc.imread(image_path, flatten=True)
+        plt.pcolor(image)
+        plt.show()
 
+    def imagesToArray(self,image_path):
+        if self.resize:
+            a = self.resize
+            return smc.imread(image_path, flatten=True)[a[0]:a[1],a[2]:a[3]]
+        else:
+            return smc.imread(image_path, flatten=True)
 
     @property
     def matrix(self):

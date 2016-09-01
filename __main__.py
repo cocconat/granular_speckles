@@ -24,6 +24,7 @@ def getParser():
     ap.add_argument("-T", "--timecoarse", help = "time carsing and sigma analysis",action="store_true")
     ap.add_argument("-S", "--spacecoarse", help = "space coarsing and correlation matrix",action="store_true")
     ap.add_argument("-v", "--videofile", help ="path for video file, long time required")
+    ap.add_argument("-r", "--resize", type=int, nargs=4, help ="resize the image to center the lightspot")
     return ap
 
 ion()
