@@ -183,7 +183,7 @@ class GetMatrix(object):
                 if fname.endswith(".png"):
                     count +=1
             return count
-        matShape=firstImage.shape[0],firstImage.shape[1],countImages())
+        matShape=firstImage.shape[0],firstImage.shape[1],countImages()
         print matShape
         array=np.zeros(matShape)
         for count, image in enumerate(self.importImages()):
