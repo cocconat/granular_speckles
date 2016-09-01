@@ -1,14 +1,11 @@
 import math
-import scipy
 import numpy as np
-import sys,os
+import os
 from scipy import misc as smc
 import matplotlib.pyplot as plt
 from PIL import Image
-from matplotlib.pyplot import plot, ion, show
 import multiprocessing
 import time, itertools
-from multiprocessing import Pool
 from functools import partial
 
 def timeit(method):
@@ -54,12 +51,6 @@ def plotStory(mat,raw,col,plt):
 
     return plt
 
-def plotFrame(frame,plt,matrix=None):
-    '''
-    plot a frame of time sequence matrix
-    '''
-    plot=Image.fromarray(matrix[:,:,frame])
-    return plt
 
 def histogram(self,raw,col,plt,mat,distribution=None,bins=10):
     '''
@@ -99,18 +90,15 @@ def correlate(array,shift):
     if shift==0: return np.sum(array*array)*1./(len(array))
     return np.sum(array[:-shift]*array[shift:])*1./(len(array)-shift)
 
-def single_correlation(time,mat,position):
-	raw,col=position
-	timepixel=mat[raw,col,:]
-	#var=np.var(timepixel)
-	mean=np.mean(timepixel)
-	var=np.var(timepixel)
-	if var > 100:
-	#timepixel=timepixel-mean
-    		correlation=np.asarray(map(lambda x: correlate(timepixel-mean,x),range(0,time)))
-    		return correlation/var
-	else:
-   		return np.zeros((time))
+def single_correlation(time,timepixel):
+    mean=np.mean(timepixel)
+    var=np.var(timepixel)
+    if var > 100:
+    #timepixel=timepixel-mean
+            correlation=np.asarray(map(lambda x: correlate(timepixel-mean,x),range(0,time)))
+            return correlation/var
+    else:
+        return np.zeros((time))
 
 @timeit
 def correlation(time,mat):
@@ -121,14 +109,12 @@ def correlation(time,mat):
     '''
     hmat=mat.shape[0]
     lmat=mat.shape[1]
-    #correlationMatrix=np.zeros(self.mat.shape)
-
     pool=multiprocessing.Pool(processes=5)
     print "start correlation stack"
-    coupleIter= itertools.product(range(mat.shape[0]),range(mat.shape[1]))
-    f=partial(single_correlation,time,mat)
+    coupleIter=(mat[r,c,:] for r,c in \
+                itertools.product(range(mat.shape[0]),range(mat.shape[1])))
+    f=partial(single_correlation,time)
     arrays=pool.map(f,coupleIter)
-
 #        for i in range(self.mat.shape[0]):
 #            a.append([self.single_correlation(i,j,time) for j in range(self.mat.shape[1])]):
 #                print "sono al pixel {} {} di {}".format(i,j,self.mat.shape)
@@ -157,6 +143,7 @@ class GetMatrix(object):
             if fname.endswith(".png"):
                 print fname
                 yield os.path.join(os.getcwd()+"/"+self.folder, fname)
+
 
     @staticmethod
     def treesholdMatrix(matrix):
@@ -190,14 +177,18 @@ class GetMatrix(object):
 
     @timeit
     def stackImages(self):
-        firstImage=self.imagesToArray(self.importImages().next())
-        matShape=firstImage.shape[0],firstImage.shape[1],len(os.listdir(os.getcwd()+"/"+self.folder))
+        def countImages():
+            count=0
+            for fname in sorted(os.listdir(os.getcwd()+"/"+self.folder)):
+                if fname.endswith(".png"):
+                    count +=1
+            return count
+        matShape=firstImage.shape[0],firstImage.shape[1],countImages())
         print matShape
         array=np.zeros(matShape)
-        array[:,:,0]=firstImage
         for count, image in enumerate(self.importImages()):
-            array[:,:,count+1]=self.imagesToArray(image)
-        return array[:,:,:count+1]
+            array[:,:,count]=self.imagesToArray(image)
+        return array[:,:,:count]
 
     def normalize(self):
         self.mat=self.mat/np.max(self.mat)
