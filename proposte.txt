@@ -1,0 +1,9 @@
+Verificare numericamente l'ergodicità del sistema rispetto alle funzioni media e tempo di correlazione, la funzione si chiama ergodic_row(matrix, func)
+Qual'è la nostra scala di tempi per le fluttuazioni? 
+questa cosa si potrebbe misurare con la decorrelazioni a blocchi, ovvero  misurando la varianza pixel per pixel rispetto a differenti coarse graining!
+Dovrebbe venire che il tempo di fluttuazione è pari al tempo di correlazione?
+La fluttuazione è il tempo che ci mette un pixel a oscillare intorno al suo valor medio?
+
+Misure di correlzione
+1) g_2(t) la misuriamo già
+2) C(delta r) (2) va misurata immagine per immagine e mediata su tutto il set temporale?ipysi
