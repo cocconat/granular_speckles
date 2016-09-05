@@ -10,16 +10,27 @@ def plotCorrelation(data):
 
 def space_correlate(matrix,shift):
     def column_correlation(matrix,shift,row):
-            return np.sum(matrix[row,:-shift]*matrix[row,shift:])*1./(matrix.shape[1]-shift)
+        def check():
+            if 0<=row-shift<120 and 0<=row+shift<120:
+                return  matrix[row+shift,shift:-shift]*matrix[row,shift:-shift]\
+                        +matrix[row-shift,shift:-shift]*matrix[row,shift:-shift]
+            else:
+                return np.zeros((matrix.shape[1]-2*shift))
+        return np.sum(matrix[row,shift:-shift]*matrix[row,:-2*shift]+\
+                        matrix[row,shift:-shift]*matrix[row,shift*2:]+
+                        check())\
+                            *1./(matrix.shape[1]-2*shift)/4
     if shift==0:
-        return map( lambda x: np.mean(np.vectorize(np.square)(matrix[x,:])), range(matrix.shape[0]) )
+        return map( lambda x: np.mean(np.vectorize(np.square)(matrix[x,:])),\
+                   range(matrix.shape[0]) )
     else:
-        return map(lambda x: column_correlation(matrix,shift,x),range(matrix.shape[0]))
+        return map(lambda x: column_correlation(matrix,shift,x),\
+                   range(matrix.shape[0]))
 
 def space_correlation(matrix,time):
     mean=np.mean(matrix[:,:,time],axis=1)**2
     func=partial(space_correlate,matrix[:,:,time])
     pool=multiprocessing.Pool(5)
-    correlation=np.array(pool.map(func,range(0,matrix.shape[1]/2)))
-    return (correlation/mean/mean.shape[0]).transpose()
+    correlation=np.array(pool.map(func,range(0,matrix.shape[1]/10)))
+    return np.nan_to_num(correlation/mean/mean.shape[0]).transpose()
 
