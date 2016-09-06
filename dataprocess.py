@@ -34,3 +34,6 @@ def space_correlation(matrix,time):
     correlation=np.array(pool.map(func,range(0,matrix.shape[1]/10)))
     return np.nan_to_num(correlation/mean/mean.shape[0]).transpose()
 
+def purify_row(matrix):
+   return np.delete(matrix,np.where((np.all(matrix,axis=1)==0)==True),axis=0)
+
