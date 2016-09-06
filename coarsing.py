@@ -50,18 +50,29 @@ def coarseSpace(timeserie,block_size):
 	'''
 	Coarser=CoarseMatrix(block_size,tuple(timeserie.shape[:-1]))
 	pool = multiprocessing.Pool(processes=5)
-	f=partial(coarsetool,Coarser,timeserie)
+	f=partial(coarsetool,Coarser)
 	h,w,t= timeserie.shape
-	matrix= pool.map(f,xrange(t))
+	matrix= pool.map(f,(timeserie[:,:,t] for t in xrange(t)))
 	h,w=matrix[0].shape
-	timeserie=np.stack(matrix).reshape(h,w,t)
-	print "space coarsed matrix shape {}".format(timeserie.shape)
+	timeserie=np.zeros((h,w,t))
+	for count,mat in enumerate(matrix):
+		timeserie[:,:,count]=mat
+	timeserie=timeserie.reshape(h,w,t)
+	print "space coarse matrix shape {}".format(timeserie.shape)
 	return timeserie
 
-def coarsetool(coarser,matrix,time):
-	return coarser.coarseMatrix(matrix[:,:,time])
+def coarsetool(coarser,matrix):
+	return coarser.coarseMatrix(matrix)
 
-
+def test_matrix():
+	coarse=CoarseMatrix(2,(10,10))
+	a=np.zeros((10,10,10))
+	a[0:2,0:2,0:2]=3
+	a[0:4,0:4,3:5]=4
+	a[:,:,6]=a[:,:,1]+a[:,:,4]
+	b=np.stack([coarse.coarseMatrix(a[:,:,i]) for i in range(10)])
+	return a,b,coarse
+ 
 class CoarseMatrix(object) :
     def __init__(self,block_size,shape):
         self.matrix=None
@@ -132,6 +143,6 @@ class CoarseMatrix(object) :
         self.newarray=newarray
         return newarray
 
-
+test_matrix()
 
 
