@@ -37,3 +37,8 @@ def space_correlation(matrix,time):
 def purify_row(matrix):
    return np.delete(matrix,np.where((np.all(matrix,axis=1)==0)==True),axis=0)
 
+def mezzaltezza(rows):
+	z=[]
+	for count,a in enumerate(ave):
+		z.append(np.argmax(a<np.max(a)/2.))
+		return np.array(z)
