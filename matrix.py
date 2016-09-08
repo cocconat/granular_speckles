@@ -21,7 +21,47 @@ def timeit(method):
 
     return timed
 
+def corrTimeMap(mat):
+	'''
+	return the matrix of correlation time. Each entries is the 
+	correlation time associated to the evolution of the pixel with that 
+	coordinate. 
+	'''
 
+	maxtime=mat.shape[2]
+
+	def chooseFunc(a):
+		if np.all(a==0):
+			return maxtime
+
+		else:
+			return np.argmax(a<np.max(a)/2.)
+			
+	
+	hmat=mat.shape[0]
+	lmat=mat.shape[1]
+	
+	
+	mat=mat.reshape(hmat*lmat,mat.shape[2])
+	mat=np.asarray(map(lambda x: chooseFunc(x), mat))
+	return mat.reshape(hmat,lmat)
+
+def corrTimeMapEvolution(mat,interval,finalTime):
+	'''
+	needs a matrix of correlation function in input
+	give the evolution of the correlation time map. Each temporal step 
+	is defined by interval argument.
+	'''
+	
+	evolution=[]
+	for i in range(0,finalTime/interval):
+		a=correlation(interval,mat[:,:,i*interval:])
+		evolution.append(corrTimeMap(a[0]))
+	out=np.asarray(evolution)
+	out=np.swapaxes(out,0,2)
+	out=np.swapaxes(out,0,1)	
+	return 	out
+_
 
 def spaceAveragedCorr(mat):
     def non_zero_iter(a):
