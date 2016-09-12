@@ -61,7 +61,7 @@ def corrTimeMapEvolution(mat,interval,finalTime):
 	out=np.swapaxes(out,0,2)
 	out=np.swapaxes(out,0,1)	
 	return 	out
-_
+
 
 def spaceAveragedCorr(mat):
     def non_zero_iter(a):
@@ -140,10 +140,10 @@ def correlate(array,shift):
     if shift==0: return np.sum(array*array)*1./(len(array))
     return np.sum(array[:-shift]*array[shift:])*1./(len(array)-shift)
 
-def single_correlation(time,timepixel):
+def single_correlation(time,cutoff,timepixel):
     mean=np.mean(timepixel)
     var=np.var(timepixel)
-    if var > 100:
+    if var > cutoff:
     #timepixel=timepixel-mean
             correlation=np.asarray(map(lambda x: correlate(timepixel-mean,x),range(0,time)))
             return correlation/var
@@ -151,7 +151,7 @@ def single_correlation(time,timepixel):
         return np.zeros((time))
 
 @timeit
-def correlation(time,mat):
+def correlation(time,mat,cutoff=20):
     '''
 	measure correlation of a matrix for a maximum time (time)
 	it returns:
@@ -163,7 +163,7 @@ def correlation(time,mat):
     print "start correlation stack"
     coupleIter=(mat[r,c,:] for r,c in \
                 itertools.product(range(mat.shape[0]),range(mat.shape[1])))
-    f=partial(single_correlation,time)
+    f=partial(single_correlation,time,cutoff)
     arrays=pool.map(f,coupleIter)
 #        for i in range(self.mat.shape[0]):
 #            a.append([self.single_correlation(i,j,time) for j in range(self.mat.shape[1])]):
