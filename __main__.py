@@ -10,7 +10,7 @@ from coarsing import *
 from matplotlib.pyplot import plot, ion, show
 from video import *
 import dataprocess
-import histogram,fit,plati,utils 
+import histogram,fit,plati,utils
 def getParser():
     import argparse
     ap = argparse.ArgumentParser("this program measure the correlation of a many frame video, then its  possible to performa a coarse graining over time or space dimension, it's a 2d project but it can be easily performed in 3d with little modification. \nThe algorithm implemented are top level for each stage and standard is parallelized over 5 procs. \n Needed library is Numpy, Scipy, multiprocessing , matplotlib, if you want to frame the video also opencv2 is needed")

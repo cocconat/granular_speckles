@@ -23,9 +23,9 @@ def timeit(method):
 
 def corrTimeMap(mat):
 	'''
-	return the matrix of correlation time. Each entries is the 
-	correlation time associated to the evolution of the pixel with that 
-	coordinate. 
+	return the matrix of correlation time. Each entries is the
+	correlation time associated to the evolution of the pixel with that
+	coordinate.
 	'''
 
 	maxtime=mat.shape[2]
@@ -36,12 +36,12 @@ def corrTimeMap(mat):
 
 		else:
 			return np.argmax(a<np.max(a)/2.)
-			
-	
+
+
 	hmat=mat.shape[0]
 	lmat=mat.shape[1]
-	
-	
+
+
 	mat=mat.reshape(hmat*lmat,mat.shape[2])
 	mat=np.asarray(map(lambda x: chooseFunc(x), mat))
 	return mat.reshape(hmat,lmat)
@@ -49,17 +49,17 @@ def corrTimeMap(mat):
 def corrTimeMapEvolution(mat,interval,finalTime):
 	'''
 	needs a matrix of correlation function in input
-	give the evolution of the correlation time map. Each temporal step 
+	give the evolution of the correlation time map. Each temporal step
 	is defined by interval argument.
 	'''
-	
+
 	evolution=[]
 	for i in range(0,finalTime/interval):
 		a=correlation(interval,mat[:,:,i*interval:])
 		evolution.append(corrTimeMap(a[0]))
 	out=np.asarray(evolution)
 	out=np.swapaxes(out,0,2)
-	out=np.swapaxes(out,0,1)	
+	out=np.swapaxes(out,0,1)
 	return 	out
 
 
@@ -137,9 +137,8 @@ def spaceVariance(mat):
         return np.array(pool.map(f,xrange(mat.shape[-1])))
 
 def correlate(array,shift):
-    if shift==0: return np.sum(array*array)*1./(len(array))
-    return np.sum(array[:-shift]*array[shift:])*1./(len(array)-shift)
-
+    if shift==0: return np.sum(array*1./(len(array))*array)
+    return np.sum(array[:-shift]*1./(len(array)-shift)*array[shift:])
 def single_correlation(time,cutoff,timepixel):
     mean=np.mean(timepixel)
     var=np.var(timepixel)
@@ -162,7 +161,7 @@ def other_correlation(time,cutoff,timepixel):
 
 
 @timeit
-def correlation(time,mat,cutoff=5,function=None):
+def correlation(time,mat,cutoff=5,function='chinasucks'):
     '''
 	measure correlation of a matrix for a maximum time (time)
 	it returns:
@@ -173,11 +172,11 @@ def correlation(time,mat,cutoff=5,function=None):
     pool=multiprocessing.Pool(processes=7)
     print "start correlation stack"
     coupleIter=(mat[r,c,:] for r,c in itertools.product(range(mat.shape[0]),range(mat.shape[1])))
-    if function==None:
-        f=partial(single_correlation,time,cutoff)
-    else:
+    if function=="chinasucks":
         print "chine science sucks"
-        f=partial(other_correlation,time,cutoff)
+        f=partial(china_correlation,time,cutoff)
+    else:
+        f=partial(single_correlation,time,cutoff)
     arrays=pool.map(f,coupleIter)
 #        for i in range(self.mat.shape[0]):
 #            a.append([self.single_correlation(i,j,time) for j in range(self.mat.shape[1])]):
@@ -230,9 +229,9 @@ class GetMatrix(object):
     def imagesToArray(self,image_path):
         if self.resize:
             a = self.resize
-            return smc.imread(image_path, flatten=True)[a[0]:a[1],a[2]:a[3]]
+            return smc.imread(image_path, mode='L')[a[0]:a[1],a[2]:a[3]]
         else:
-            return smc.imread(image_path, flatten=True)
+            return smc.imread(image_path, mode='L')
 
     @property
     def matrix(self):
@@ -260,11 +259,10 @@ class GetMatrix(object):
         matShape=firstImage.shape[0],firstImage.shape[1],countImages()
         print matShape
         array=np.zeros(matShape)
-        array[:,:,0]=firstImage
+        array[:,:,0]=np.array(firstImage,dtype=np.int8)
         for count, image in enumerate(self.importImages()):
-            array[:,:,count]=self.imagesToArray(image)
-        return array[:,:,:count]
-
+            array[:,:,count]=np.array(self.imagesToArray(image),dtype=np.int8)
+        return np.array(array[:,:,:count],dtype=np.int8)
     def normalize(self):
         self.mat=self.mat/np.max(self.mat)
 
