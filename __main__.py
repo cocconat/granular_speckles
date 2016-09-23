@@ -10,6 +10,7 @@ from coarsing import *
 from matplotlib.pyplot import plot, ion, show
 from video import *
 import dataprocess
+import histogram,fit,plati,utils 
 def getParser():
     import argparse
     ap = argparse.ArgumentParser("this program measure the correlation of a many frame video, then its  possible to performa a coarse graining over time or space dimension, it's a 2d project but it can be easily performed in 3d with little modification. \nThe algorithm implemented are top level for each stage and standard is parallelized over 5 procs. \n Needed library is Numpy, Scipy, multiprocessing , matplotlib, if you want to frame the video also opencv2 is needed")
@@ -19,10 +20,12 @@ def getParser():
     ap.add_argument("-b", "--block_size",help = "apply coarse graining, this is dimension for image reduction")
     ap.add_argument("-m", "--matrix_story", help = "colorful image for pixel evolution",action="store_true")
     ap.add_argument("-c", "--correlation", help = "measure the time correlation for each pixel of final matrix")
+    ap.add_argument("-C", "--cutoff", help = "minimal variance ast to not be considered noise")
     ap.add_argument("-t", "--takealook", help = "colorful image for pixel evolution",action="store_true")
     ap.add_argument("-i", "--file_import", help = "folder for png images to process",action="store_true")
     ap.add_argument("-T", "--timecoarse", help = "time carsing and sigma analysis",action="store_true")
     ap.add_argument("-S", "--spacecoarse", help = "space coarsing and correlation matrix",action="store_true")
+    ap.add_argument("-F", "--cor_function", help = "chose which correlation function you're using, the china or european styla",action="store_true")
     ap.add_argument("-v", "--videofile", help ="path for video file, long time required")
     ap.add_argument("-r", "--resize", type=int, nargs=4, help ="resize the image to center the lightspot")
     return ap
@@ -121,7 +124,7 @@ def main():
         print "so many frame {} to folder {}".format(videoToFrame(args),args.image_folder)
 
     if args.file_import:
-        time_serie=np.load(args.image_folder+"/image_matrix"+".npy")
+        time_serie=2*np.load(args.image_folder+"/image_matrix"+".npy")
         if not time_serie==None :
             print "IMAGE-MATRIX  HAS BEEN CORRECTLY uploaded"
         else:
@@ -137,8 +140,6 @@ def main():
         #varianceMatrix=timeVariance(time_serie)
         #print "la somma della varianza della matrice di input e' {}".format(varianceMatrix.mean())
         explore_time(time_serie,pause=0.00001)
-
-    mymatrix=time_serie
 
     #plotMatrix(varianceMatrix)
     #time_serie.plotFrame(19)
@@ -157,23 +158,29 @@ def main():
 
     if args.timecoarse:
        #saving time decorrelation matrix
-        mymatrix=coarseSpace(time_serie,2)
-        timeDecorrelation(mymatrix,resultPath,range(1,50,1))
+        timeDecorrelation(mcoarseSpace(time_serie,2),resultPath,range(1,50,1))
 
     if args.spacecoarse:
+        fullPath="results/"+args.image_folder+"/full_correlation/"
+        togePath="results/"+args.image_folder+"/all_together/"
         corrtime=args.correlation or 300
        #saving correlation for various coarse graining
-        for block, reducedSerie in blockIteration(time_serie,[1,2,3,4,5,6,7,8,9,10,12,15,18,20,22,25]):
-            full_core, spaceAverage=correlation(int(corrtime),reducedSerie)
-            np.savetxt(resultPath+"/spaceAverage_"+str(block)+".dat", spaceAverage)
+        for block, reducedSerie in blockIteration(time_serie,[2,3,4,5,6,10,15,20,25]):
+            full_core,all_together=correlation(int(corrtime),reducedSerie)
+            mezza=dataprocess.mezzaltezza(all_together)
+            np.save(togePath+block_size,all_togethe)
+            np.save(fullPath+block_size,full_core)
+            np.save(togePath+block_size+"mezzaltezza",mezza)
+            del reducedSerie
 
     if args.matrix_story:
         explore_time(new_time_serie,'plotFrame',pause=0.00001)
 
     if args.correlation:
-        full_core,all_together=correlation(int(args.correlation),mymatrix)
+        full_core,all_together=correlation(int(args.correlation),time_serie,cutoff=args.cutoff,function=args.cor_function)
         #plt.plot(range(len(all_togheter)),all_togheter)
         #time_serie.plotStory(80,120,pause=20)
+        mezza=dataprocess.mezzaltezza(all_together)
         fullPath="results/"+args.image_folder+"/full_correlation/"
         togePath="results/"+args.image_folder+"/all_together/"
         if not os.path.exists(fullPath):
@@ -182,6 +189,7 @@ def main():
             os.makedirs(togePath)
         np.save(fullPath+block_size,full_core)
         np.save(togePath+block_size,all_together)
+        np.save(togePath+block_size+"mezzaltezza",mezza)
 
     #lista=new_time_serie.single_correlation(50,15,50)
     globals().update(locals())

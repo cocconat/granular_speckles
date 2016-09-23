@@ -89,3 +89,11 @@ def blockIteration(timeserie,*args):
 
 
 
+def plottala(z):
+	plt.plot(range(len(z)),z)
+	plt.scatter(range(len(z)),z)
+
+def plottaAve(a):
+    for i in range(a.shape[0]):
+        plt.plot(range(a.shape[1]),a[i])
+        plt.show()

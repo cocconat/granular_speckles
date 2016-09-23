@@ -150,8 +150,19 @@ def single_correlation(time,cutoff,timepixel):
     else:
         return np.zeros((time))
 
+def other_correlation(time,cutoff,timepixel):
+    mean=np.mean(timepixel)
+    var=np.var(timepixel)
+    if var > cutoff:
+    #timepixel=timepixel-mean
+            correlation=np.asarray(map(lambda x: correlate(timepixel,x),range(0,time)))
+            return correlation/mean/mean
+    else:
+        return np.zeros((time))
+
+
 @timeit
-def correlation(time,mat,cutoff=20):
+def correlation(time,mat,cutoff=5,function=None):
     '''
 	measure correlation of a matrix for a maximum time (time)
 	it returns:
@@ -159,11 +170,14 @@ def correlation(time,mat,cutoff=20):
     '''
     hmat=mat.shape[0]
     lmat=mat.shape[1]
-    pool=multiprocessing.Pool(processes=5)
+    pool=multiprocessing.Pool(processes=7)
     print "start correlation stack"
-    coupleIter=(mat[r,c,:] for r,c in \
-                itertools.product(range(mat.shape[0]),range(mat.shape[1])))
-    f=partial(single_correlation,time,cutoff)
+    coupleIter=(mat[r,c,:] for r,c in itertools.product(range(mat.shape[0]),range(mat.shape[1])))
+    if function==None:
+        f=partial(single_correlation,time,cutoff)
+    else:
+        print "chine science sucks"
+        f=partial(other_correlation,time,cutoff)
     arrays=pool.map(f,coupleIter)
 #        for i in range(self.mat.shape[0]):
 #            a.append([self.single_correlation(i,j,time) for j in range(self.mat.shape[1])]):

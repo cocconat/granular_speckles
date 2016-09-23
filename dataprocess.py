@@ -1,5 +1,6 @@
 import numpy as np
 from coarsing import *
+from scipy.signal import argrelextrema
 def importMatrix(args):
     fullPath="results/"+args.image_folder+"/full_correlation/"
     togePath="results/"+args.image_folder+"/all_together/"
@@ -42,3 +43,10 @@ def mezzaltezza(ave):
 	for count,a in enumerate(ave):
 		z.append(np.argmax(a<np.max(a)/2.))
 	return np.array(z)
+
+def taulocalmin(ave):
+    z=[]
+    for count,a in enumerate(ave):
+        z.append(argrelextrema(a,np.less)[0][0])
+        
+    return np.array(z)

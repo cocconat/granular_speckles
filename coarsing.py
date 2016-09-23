@@ -44,7 +44,7 @@ def test_speed(self):
 	    return first
 
 @timeit
-def coarseSpace(timeserie,block_size):
+def coarseSpace(block_size,timeserie):
 	'''
 	coarsening over a time series matrix
 	'''
