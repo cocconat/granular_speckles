@@ -18,3 +18,9 @@ def timeit(method):
         return result
     return timed
 
+
+def test_speed(self):
+    second = self.parallelReducedTime()
+    first = self.reducedTime()
+    if (first == second).all():
+        return first

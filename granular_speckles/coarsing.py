@@ -6,61 +6,104 @@
 import numpy as np
 import math
 import itertools
-import multiprocessing
 from functools import partial
 from granular_speckles.utils import timeit
 
 
-def coarsetool_time(matrix, L, t, pos):
-    return np.array([np.mean(matrix[pos[0], pos[1], i:i+L])
-                     for i in np.arange(t/L)])
+def coarsetool_linear(matrix, L, t, pos, axes=2):
+    """
+    Convolve linearly with block size L
+    __ This method is defined by request of multiprocessing library
+    """
+    if axes is 0:
+        return np.array([np.mean(matrix[i:i+L, pos[0], pos[1]])
+                         for i in np.arange(int(t/L))])
+    if axes is 1:
+        return np.array([np.mean(matrix[pos[0], i:i+L, pos[1]])
+                         for i in np.arange(int(t/L))])
+    if axes is 2:
+        return np.array([np.mean(matrix[pos[0], pos[1], i:i+L])
+                         for i in np.arange(int(t/L))])
 
 
 @timeit
-def coarseTime(timeserie, block_size):
-    """
-    coarsening over time of a time serie
-    """
-    h, w, t = timeserie.shape
+def coarseTime(timeserie, block_size, procs=6):
+    '''
+    Coarse the time_series over time dimension.\
+        reduce the matrix with 'block_size' multiplicative factor.\
+        This function implements parallelism with multiprocessing library
+    whether the multiprocessing is unavailable set procs = 1
+
+    Parameters:
+    ==========
+    time_serie: np.array 3D matrix, with first 2 dimension are geometrical\
+        and 3rd is time variable.
+
+    block_size: int, reducing factor.
+
+    procs: int, number of procs to use for matrix reduction. Set to 1 disable \
+        multiprocessing
+
+    '''
+    h, w, old_t = timeserie.shape
+    new_t = int(old_t/block_size)
     coupleiter = itertools.product(np.arange(h), np.arange(w))
     print("time coarsed matrix shape: {}, block size: {}"
-          .format((h, w, t/block_size), block_size))
-    pool = multiprocessing.Pool(processes=5)
-    f = partial(coarsetool_time, timeserie, block_size, t)
-    return np.stack(pool.map(f, coupleiter)).reshape(h, w, t/block_size)
-
-
-def test_speed(self):
-    second = self.parallelReducedTime()
-    first = self.reducedTime()
-    if (first == second).all():
-        return first
+          .format((h, w, new_t), block_size))
+    f = partial(coarsetool_linear, timeserie, block_size, old_t)
+    if procs is not 1:
+        import multiprocessing
+        pool = multiprocessing.Pool(procs)
+        return np.stack(pool.map(f, coupleiter)).reshape(h, w, new_t)
+    else:
+        return np.stack([f(x) for x in coupleiter]).reshape(h, w, new_t)
 
 
 @timeit
-def coarseSpace(block_size, timeserie):
+def coarseSpace(timeserie, block_size, procs=5):
     '''
-    coarsening over a time series matrix
+    Coarse the time_series over space dimensions.
+    reduce the matrix with 'block_size' multiplicative factor.
+    This function implements parallelism with multiprocessing library
+    whether the multiprocessing is unavailable set procs = 1
+
+    Parameters:
+    ==========
+    time_serie: np.array 3D matrix, with first 2 dimension are geometrical\
+        and 3rd is time variable.
+
+    block_size: int, reducing factor, horizontal and vertical.
+
+    procs: int, number of procs to use for matrix reduction. Set to 1 disable \
+        multiprocessing
+
     '''
     Coarser = CoarseMatrix(block_size, tuple(timeserie.shape[:-1]))
-    pool = multiprocessing.Pool(processes=5)
-    f = partial(coarsetool, Coarser)
+    f = partial(coarsetool_space, Coarser)
     h, w, t = timeserie.shape
-    matrix = pool.map(f, (timeserie[:, :, t] for t in np.arange(t)))
+    if procs is not 1:
+        import multiprocessing
+        pool = multiprocessing.Pool(procs)
+        matrix = pool.map(f, (timeserie[:, :, t_] for t_ in np.arange(t)))
+    else:
+        matrix = np.array([f(timeserie[:, :, t_]) for t_ in np.arange(t)])
     h, w = matrix[0].shape
     timeserie = np.zeros((h, w, t))
     for count, mat in enumerate(matrix):
         timeserie[:, :, count] = mat
     timeserie = timeserie.reshape(h, w, t)
-    print ("space coarse matrix shape {}".format(timeserie.shape))
+    print("space coarse matrix shape {}".format(timeserie.shape))
     return timeserie
 
 
-def coarsetool(coarser, matrix):
+def coarsetool_space(coarser, matrix):
     return coarser.coarseMatrix(matrix)
 
 
-def test_matrix():
+def __test_matrix():
+    """
+    Matrix used to test the coarsetool_space
+    """
     coarse = CoarseMatrix(2, (10, 10))
     a = np.zeros((10, 10, 10))
     a[0:2, 0:2, 0:2] = 3
@@ -146,6 +189,3 @@ class CoarseMatrix(object):
             newarray[i, j] = submatrix
         self.newarray = newarray
         return newarray
-
-
-test_matrix()
