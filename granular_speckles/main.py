@@ -1,22 +1,17 @@
-#!/usr/bin/python2.7
-'''
-trhda
-'''
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+# This file belongs to DWGranularSpeckles project.
+# The software is realeased with MIT license.
 import numpy as np
 import os
 from matplotlib.pyplot import ion
 from .video import get_frame_rate, videoToFrame
 from .dataprocess import halfheight
-# import fit
-# import plati
-# import utils
 from .cli_parser import getParser
 from .matrix import GetMatrix, correlation
 from .coarsing import coarseSpace
 from .datavisual import timeDecorrelation, blockIteration, \
     explore_time, explore
-
-ion()
 
 
 def main():
@@ -40,7 +35,9 @@ def main():
             raise "image not correctly uploaded!!!"
     else:
         print("image acquisition in process... requires time.")
-        time_serie = GetMatrix(args).matrix
+        time_serie = GetMatrix(args.image_folder,
+                               args.resize,
+                               args.black).matrix
         np.save(args.image_folder+"/image_matrix", time_serie)
         print("imported matrix has shapes: {}".format(time_serie.shape))
 

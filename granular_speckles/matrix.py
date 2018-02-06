@@ -1,3 +1,7 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+# This file belongs to DWGranularSpeckles project.
+# The software is realeased with MIT license.
 import math
 import numpy as np
 import os
@@ -189,16 +193,16 @@ def correlation(time, mat, cutoff=5, function='chinasucks'):
 
 
 class GetMatrix(object):
-    def __init__(self, args):
+    def __init__(self, image_folder, resize=None, black=None):
         '''
         you need this class to import image,
         it process and give you a 3 dimensional array,
         2d-space and time
         '''
-        self.folder = args.image_folder
-        self.black = args.black
+        self.folder = image_folder
+        self.black = black
         self.mat = None
-        self.resize = args.resize
+        self.resize = resize
 
     def importImages(self):
         for fname in sorted(os.listdir(os.getcwd()+"/"+self.folder)):
@@ -235,7 +239,7 @@ class GetMatrix(object):
     @property
     def matrix(self):
         '''
-        this is your matrix!!
+
         '''
 
         if self.mat is None:

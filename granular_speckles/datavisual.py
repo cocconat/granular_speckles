@@ -1,3 +1,7 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+# This file belongs to DWGranularSpeckles project.
+# The software is realeased with MIT license.
 from granular_speckles.coarsing import coarseSpace, coarseTime
 from granular_speckles.matrix import plotStory,\
     timeVariance, spaceVariance
@@ -32,13 +36,24 @@ def plotCorrelation(data):
 
 
 def explore_time(time_serie, pause=0.00001):
-    '''explore time is a'''
+    '''
+    Show the imported time serie as a stack of 2D images.
+
+    Parameters:
+    ===========
+
+    time_serie: np.array 3D matrix, with first 2 dimension are geometrical
+                and 3rd is time variable.
+
+    pause: time for each frame, lower bound depends by hardware performances
+    '''
+
     array = time_serie
     for i in range(array.shape[2]):
         if pause:
             plt.figure(1)
             plt.title("time is {}".format(i))
-            plt.pcolor(array[:, :, i])
+            plt.imshow(array[:, :, i], vmin=0, vmax=256)
             plt.pause(pause)
             plt.clf()
 

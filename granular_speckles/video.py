@@ -1,3 +1,5 @@
+# This file belongs to DWGranularSpeckles project.
+# The software is realeased with MIT license.
 import os
 import sys
 import subprocess
