@@ -93,7 +93,7 @@ def blockIteration(timeserie, *args):
     if len(args) == 1:
         args = args[0]
     for block in args:
-        yield block, coarseSpace(block, timeserie)
+        yield block, coarseSpace(timeserie, block)
 
 
 def plottala(z):

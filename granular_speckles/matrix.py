@@ -173,12 +173,12 @@ def correlation(time, mat, cutoff=5, function='chinasucks'):
     '''
     hmat = mat.shape[0]
     lmat = mat.shape[1]
-    pool = multiprocessing.Pool(processes=7)
+    pool = multiprocessing.Pool(processes=2)
     print ("start correlation stack")
     coupleIter = (mat[r, c, :] for r, c in itertools.product(
-        range(mat.shape[0]), range(mat.shape[1])))
+        range(hmat), range(lmat)))
     f = partial(single_correlation, time, cutoff)
-    arrays = pool.map(f, coupleIter)
+    arrays = list(map(f, coupleIter))
 #        for i in range(self.mat.shape[0]):
 #            a.append([self.single_correlation(i,j,time) for j
 #                                       n range(self.mat.shape[1])]):
