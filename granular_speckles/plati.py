@@ -54,6 +54,4 @@ def intVSvar(mat):
 	
 		
 	
-	
-	
-	
+
