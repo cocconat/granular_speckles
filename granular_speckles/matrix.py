@@ -13,14 +13,14 @@ from functools import partial
 from granular_speckles.utils import timeit
 
 
-def corrTimeMap(mat):
+def corrTimeMap(matrix):
     '''
     return the matrix of correlation time. Each entries is the
     correlation time associated to the evolution of the pixel with that
     coordinate.
     '''
 
-    maxtime = mat.shape[2]
+    maxtime = matrix.shape[2]
 
     def chooseFunc(a):
         if np.all(a == 0):
@@ -29,15 +29,15 @@ def corrTimeMap(mat):
         else:
             return np.argmax(a < np.max(a)/2.)
 
-    hmat = mat.shape[0]
-    lmat = mat.shape[1]
+    hmat = matrix.shape[0]
+    lmat = matrix.shape[1]
 
-    mat = mat.reshape(hmat*lmat, mat.shape[2])
-    mat = np.asarray(map(lambda x: chooseFunc(x), mat))
-    return mat.reshape(hmat, lmat)
+    matrix = matrix.reshape(hmat * lmat, matrix.shape[2])
+    matrix = np.asarray(map(lambda x: chooseFunc(x), matrix))
+    return matrix.reshape(hmat, lmat)
 
 
-def corrTimeMapEvolution(mat, interval, finalTime):
+def corrTimeMapEvolution(matrix, interval, finalTime):
     '''
     needs a matrix of correlation function in input
     give the evolution of the correlation time map. Each temporal step
@@ -46,7 +46,7 @@ def corrTimeMapEvolution(mat, interval, finalTime):
 
     evolution = []
     for i in range(0, finalTime/interval):
-        a = correlation(interval, mat[:, :, i*interval:])
+        a = correlation(interval, matrix[:, :, i * interval:])
         evolution.append(corrTimeMap(a[0]))
     out = np.asarray(evolution)
     out = np.swapaxes(out, 0, 2)
@@ -55,17 +55,22 @@ def corrTimeMapEvolution(mat, interval, finalTime):
 
 
 def spaceAveragedCorr(mat):
-    def non_zero_iter(a):
-        for b in range(mat.shape[1]):
-            if np.mean(mat[a, b, :]) != 0:
-                yield mat[a, b, :]
+    def non_zero_pixels(height) :
+        pixels=[]
+        for pixel in range(mat.shape[1]):
+            if np.var(mat[height, pixel, :]) != 0:
+                pixels.append(pixel)
+        if not pixels:
+            return np.zeros((1,1))
+        else:
+            return mat[[height]*len(pixels),pixels,:]
+
+
     myarray = np.zeros((mat.shape[0], mat.shape[2]))
     for a in range(mat.shape[0]):
-        myarray[a, :] = np.mean(
-            np.array([c for c in non_zero_iter(a)]), axis=0)
+        myarray[a, :] = np.mean(non_zero_pixels(a), axis=0)
     print ("matrix shape {}, myarray shape {}\
            ".format(mat.shape, myarray.shape))
-
     return myarray
 
 
@@ -165,27 +170,36 @@ def other_correlation(time, cutoff, timepixel):
 
 
 @timeit
-def correlation(time, mat, cutoff=5, function='chinasucks'):
+def correlation(time, matrix, cutoff=5, function='chinasucks'):
     '''
-    measure correlation of a matrix for a maximum time (time)
-    it returns:
-        corrMatrix, np.nan_to_num(spaceAveragedCorr(time,arrays))
+    Measure correlation of a matrix in third axis (time)
+
+    The functions measure the correlation for all distances, from zero to time
+    Parameters:
+    ==========
+    time: maximum time to measure
+    matrix: matrix to process, type: np.ndarray(h,v,d)
+
+    Returns:
+    ========
+    corrMatrix:
+    np.nan_to_num(spaceAveragedCorr(time,arrays))
     '''
-    hmat = mat.shape[0]
-    lmat = mat.shape[1]
+    hmat = matrix.shape[0]
+    lmat = matrix.shape[1]
     pool = multiprocessing.Pool(processes=2)
-    print ("start correlation stack")
-    coupleIter = (mat[r, c, :] for r, c in itertools.product(
+    # print ("start correlation stack")
+    coupleIter = (matrix[r, c, :] for r, c in itertools.product(
         range(hmat), range(lmat)))
     f = partial(single_correlation, time, cutoff)
-    arrays = list(map(f, coupleIter))
+    arrays = pool.map(f, coupleIter)
 #        for i in range(self.mat.shape[0]):
 #            a.append([self.single_correlation(i,j,time) for j
 #                                       n range(self.mat.shape[1])]):
 #                print "sono al pixel {} {} di {}".format(i,j,self.mat.shape)
 #                a.append(self.single_correlation(i,j,time))
     corrMatrix = np.zeros((hmat, lmat, int(time)))
-    coupleIter = itertools.product(range(mat.shape[0]), range(mat.shape[1]))
+    coupleIter = itertools.product(range(matrix.shape[0]), range(matrix.shape[1]))
     for r, c in coupleIter:
         corrMatrix[r, c, :] = arrays.pop(0)
     print ("end correlation stack")
