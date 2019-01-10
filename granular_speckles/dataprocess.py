@@ -6,10 +6,11 @@
 
 import functools
 import multiprocessing
-
 import numpy as np
 from scipy.signal import argrelextrema
 
+def mobilmean(block_size,array):
+    return map(lambda x:np.mean(array[x:x+block_size]),range(len(array)-block_size))
 
 def importMatrix(args):
     fullPath = "results/"+args.image_folder+"/full_correlation/"
