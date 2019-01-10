@@ -5,45 +5,47 @@
 
 import numpy as np
 import os
-from matplotlib.pyplot import ion
-from .video import get_frame_rate, videoToFrame
-from .dataprocess import halfheight
+
 from .cli_parser import getParser
-from .matrix import GetMatrix, correlation
 from .coarsing import coarseSpace
+from .dataprocess import halfheight
 from .datavisual import timeDecorrelation, blockIteration, \
     explore_time, explore
+from .matrix import GetMatrix, correlation
+from .video import get_frame_rate, videoToFrame
 
 
 def main():
     args = getParser().parse_args()
-    time_serie = None
+    time_series = None
+
+    # import video file
     if args.videofile is not None:
         print("importing frames from video")
         print("video frame number : ", get_frame_rate(args.videofile))
         print("exporting video frames (num: {}) \
                to folder {}".format(videoToFrame(args), args.image_folder))
 
+    # import previously processed video matrix
     if args.file_import:
         print("Importing matrix from file: {}".
               format(os.path.join(args.image_folder, "image_matrix" + ".npy")))
-        # TODO!! Here there was a 2 factor before np.load!!
-        time_serie = np.load(os.path.join(
-            args.image_folder, "image_matrix"+".npy"))
-        if isinstance(time_serie, np.ndarray):
+        time_series = np.load(os.path.join(
+            args.image_folder, "image_matrix" + ".npy"))
+        if isinstance(time_series, np.ndarray):
             print("image-matrix correctly uploaded")
         else:
-            raise "image not correctly uploaded!!!"
+            raise Exception("image not correctly uploaded!!!")
     else:
         print("image acquisition in process... requires time.")
-        time_serie = GetMatrix(args.image_folder,
+        time_series = GetMatrix(args.image_folder,
                                args.resize,
                                args.black).matrix
-        np.save(args.image_folder+"/image_matrix", time_serie)
-        print("imported matrix has shapes: {}".format(time_serie.shape))
+        np.save(args.image_folder + "/image_matrix", time_series)
+        print("imported matrix has shapes: {}".format(time_series.shape))
 
-    if args.takealook:
-        explore_time(time_serie)
+    if args.visualize:
+        explore_time(time_series)
 
     # varianceMatrix=timeVariance(time_serie)
     # print "la somma della varianza della matrice di input e' {}".
@@ -59,47 +61,47 @@ def main():
     else:
         block_size = args.block_size
 
-    resultPath = "results"+"/"+args.image_folder
-    if not os.path.exists(resultPath):
-        os.makedirs(resultPath)
+    result_path = "results" + "/" + args.image_folder
+    if not os.path.exists(result_path):
+        os.makedirs(result_path)
 
     if args.timecoarse:
-        timeDecorrelation(coarseSpace(time_serie, 2),
-                          resultPath, range(1, 50, 1))
+        timeDecorrelation(coarseSpace(time_series, 2),
+                          result_path, range(1, 50, 1))
 
     if args.spacecoarse:
-        fullPath = "results/"+args.image_folder+"/full_correlation/"
-        togePath = "results/"+args.image_folder+"/all_together/"
+        full_path = "results/" + args.image_folder + "/full_correlation/"
+        togePath = "results/" + args.image_folder + "/all_together/"
         corrtime = args.correlation or 300
         # saving correlation for various coarse graining
-        for block, reducedSerie in blockIteration(time_serie,
+        for block, reducedSerie in blockIteration(time_series,
                                                   [2, 3, 6, 10, 15, 20, 25]):
             full_core, all_together = correlation(int(corrtime), reducedSerie)
             mezza = halfheight(all_together)
-            np.save(togePath+block_size, all_together)
-            np.save(fullPath+block_size, full_core)
-            np.save(togePath+block_size+"mezzaltezza", mezza)
+            np.save(togePath + block_size, all_together)
+            np.save(full_path + block_size, full_core)
+            np.save(togePath + block_size + "mezzaltezza", mezza)
             del reducedSerie
 
     if args.matrix_story:
-        explore(time_serie)
+        explore(time_series)
 
     if args.correlation:
         full_core, all_together = correlation(int(args.correlation),
-                                              time_serie, cutoff=args.cutoff,
+                                              time_series, cutoff=args.cutoff,
                                               function=args.cor_function)
         # plt.plot(range(len(all_togheter)),all_togheter)
         # time_serie.plotStory(80,120,pause=20)
         mezza = halfheight(all_together)
-        fullPath = "results/"+args.image_folder+"/full_correlation/"
-        togePath = "results/"+args.image_folder+"/all_together/"
-        if not os.path.exists(fullPath):
-            os.makedirs(fullPath)
+        full_path = "results/" + args.image_folder + "/full_correlation/"
+        togePath = "results/" + args.image_folder + "/all_together/"
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
         if not os.path.exists(togePath):
             os.makedirs(togePath)
-        np.save(fullPath+block_size, full_core)
-        np.save(togePath+block_size, all_together)
-        np.save(togePath+block_size+"mezzaltezza", mezza)
+        np.save(full_path + block_size, full_core)
+        np.save(togePath + block_size, all_together)
+        np.save(togePath + block_size + "mezzaltezza", mezza)
 
     globals().update(locals())
 

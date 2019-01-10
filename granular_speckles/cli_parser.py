@@ -28,7 +28,7 @@ def getParser():
                     help="measure the time correlation for each pixel of final matrix")
     ap.add_argument("-C", "--cutoff",
                     help="minimal variance ast to not be considered noise")
-    ap.add_argument("-t", "--takealook",
+    ap.add_argument("-t", "--visualize",
                     help="colorful image for pixel evolution", action="store_true")
     ap.add_argument("-i", "--file_import",
                     help="folder for png images to process", action="store_true")
