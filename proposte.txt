@@ -7,3 +7,103 @@ La fluttuazione è il tempo che ci mette un pixel a oscillare intorno al suo val
 Misure di correlzione
 1) g_2(t) la misuriamo già
 2) C(delta r) (2) va misurata immagine per immagine e mediata su tutto il set temporale?ipysi
+In questo file tutte le spiegazioni a come
+sono generati i file nella cartella dati
+
+### Velocità misurate:
+nel caso ho 9 velocità sono queste:
+vel = [0.05, 0.07, 0.1, 0.3, 0.5, 0.7,1.,1.2,1.5]
+se ne ho 8 le velocità sono queste:
+vel = [0.05, 0.07, 0.1, 0.3, 0.5, 0.7,1.2,1.5]
+
+###Matrici dei tempi di correlazione
+
+./dati/allCorrMap_Mezz_Sp10_NOCUTOFF
+Per ogni velocità la matrice dei tempi di correlazione con
+coarse-grain spaziale pari a 10, i tempi di
+correlazione sono calcolati con il criterio
+della mezz'altezza.
+Senza cutOff dei pixel rumorosi con in blank
+screen tuning
+
+
+./dati/allCorrMap_MinLoc_Sp10_NOCUTOFF
+è uguale all'altra!! mananggia, serve trovarla di
+nuovo!
+Per ogni velocità la matrice dei tempi di correlazione con
+coarse-grain spaziale pari a 10, i tempi di
+correlazione sono calcolati con il criterio
+della mezz'altezza.
+Senza cutOff dei pixel rumorosi con in blank
+screen tuning
+
+###Altezza della ShearBand in funzione della
+velocità.
+:ew
+#####Criterio della varianza (come cambia la
+varianza dei tempi di correlazione in funzione
+dell'altezza) la varianza è misurata riga per
+riga.
+Tempi di correlazione a mezz'altezza
+SBdriftVarMezz.npy
+Tempi di correlazione con il primo minimo
+locale
+SBdriftVarTauLoc.npy
+
+
+
+#### Barlumi di speranza:
+
+1. Prendi AllCorrMat_Mezz_SP10...
+2. Fai la media sulle righe (axis=2) [bravo andrea :P]
+3. Mediamobile (file in ./dati/mobilmean.py) con finestra =10
+4. Fai il plot delle velocità [1,3,4,6,7]
+5. Riscala con il massimo della funzione
+6. Capisci come trovare il cambio di regime.
+7. Il cambio di regime si trova misurando il
+rapporto incrementale della funzione con
+ascisse variabili (maggiori di 1) --> usando
+find_jump.
+8. Si trova il massimo di questo array e
+questo è il punto medio della shearband.
+
+#####Altre cose fatte:
+Abbiamo misurato la robustezza della nostra
+misura rispetto al variare dei parametri per
+estrapolare gli andamenti della funzione, in
+particolare la mediamobile e la lunghezza del
+jump.
+
+#####Cose da fare:
+1. Plottare la matrice con i tempi di
+correlazione in modo che la transizione tra i
+due regimi (i.e. la shearband) possa essere
+visualizzata ad occhio come una transizione
+tra i colori, magari distribuire le barre
+sulle ascisse in modo da corrispondere con le
+rispettive velocità.
+
+2. Intendere il jump come una misura
+dell'errore sulla shear band, in particolare i
+punti di inizio e fine nella loro proiezione
+sulle ordinate, usare questa misura come
+descrizione fisica della shear band nella
+funzione che confronta l'altezza della shear
+band con le velocità.
+
+3. Sviluppare il ragionamento sull'ampiezza
+del segnale rilevato, ricordando le giuste
+dimensioni dei pixel, del cammino libero medio
+della luce e del fraccazzo.
+
+Baci baci
+
+
+Per l'articolo:
+
+Fare
+
+Usare solo l'inizio della shearband (della salita) per individuare la FAMOSISSIMA
+shearband. Questa cosa si sovrappone molto bene con l'istogramma ottenuto con la 2D.
+
+Andrebbe plottato in funzione delle velocità.
