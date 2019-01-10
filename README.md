@@ -41,7 +41,7 @@ For each pixel there is
 	-c CORRELATION, --correlation CORRELATION
 	                    measure the time correlation for each pixel of final
 	                    matrix
-	-t, --takealook       colorful image for pixel evolution
+	-t, --visualize       colorful image for pixel evolution
 	-i, --file_import     folder for png images to process
 	-T, --timecoarse      time carsing and sigma analysis
 	-S, --spacecoarse     space coarsing and correlation matrix
