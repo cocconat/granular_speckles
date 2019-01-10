@@ -31,7 +31,7 @@ conf = dict(
         classifiers=[
           "License :: OSI Approved :: GNU Affero General Public License v3",
           "Operating System :: POSIX :: Linux",
-          "Programming Language :: Python :: 3.6",
+          "Programming Language :: Python :: 2.7",
         ])
 
 
