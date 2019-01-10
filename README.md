@@ -1,14 +1,33 @@
-# granular_speckles
-Python based analysis for many speckels spectroscopy
+# Granular Speckles
+Python based analysis for speckels-based spectroscopy
+Utility to measure the correlation among frames of diffusing wave spectroscopy videos.
+The algorithm implementedi are optimized and parallelized over 'procs'.
+Requirements: Numpy, Scipy, multiprocessing, matplotlib.
+<!--To frame the video also opencv2 is required")-->
+
+## How:
+1. From video to frames
+2. From frame to 8it matrices
+3. Matrix normalization
+4. Matrix Analysis and data
+   visualization
+
+## Matrix correlation analysis:
+The matrix are coarse grained -to
+reduce the sensor noise-  and the
+correlation of the 2D frame is measured
+with the respect of the temporal variable.
+For each pixel there is
+@TODO finire la descrizione
 
 
-usage: this program measure the correlation of a many frame video, then its  possible to performa a coarse graining over time or space dimension, it's a 2d project but it can be easily performed in 3d with little modification. 
-The algorithm implemented are top level for each stage and standard is parallelized over 5 procs. 
-Needed library is Numpy, Scipy, multiprocessing , matplotlib, if you want to frame the video also opencv2 is needed
- 
+
+
+
+
  `python granular speckles --help`
  `[-h] [-bn] [-f IMAGE_FOLDER] [-b BLOCK_SIZE] [-m] [-c CORRELATION] [-t] [-i] [-T] [-S] [-v VIDEOFILE]`
- 
+
 
 ##### Optional arguments
 	-h, --help            show this help message and exit
