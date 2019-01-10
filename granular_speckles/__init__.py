@@ -4,9 +4,10 @@
 # The software is realeased with MIT license.
 
 from .video import get_frame_rate, videoToFrame
-from .dataprocess import halfheight
+from .dataprocess import halfheight, mobilmean
+from .shearband import shearBand
 from .cli_parser import getParser
 from .matrix import GetMatrix, correlation
-from .coarsing import coarseSpace, coarseTime
+from .coarsing import coarseSpace, coarseTime, CoarseMatrix
 from .datavisual import timeDecorrelation, blockIteration, \
     explore_time, explore
