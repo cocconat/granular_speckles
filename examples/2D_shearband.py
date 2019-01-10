@@ -9,7 +9,7 @@ import os, sys
 def linear(x,m,b):
     return m*x+b
 
-matrices = np.load("../Dicembre18/dati/allCorrTimeMap_MinLoc_Sp10_NOCUTOFF.npy")
+matrices = np.load("data_shearband/dati/allCorrTimeMap_MinLoc_Sp10_NOCUTOFF.npy")
 vel = np.array([0.05, 0.07, 0.1, 0.3, 0.5, 0.7,1.2,1.5])
 
 # set data byu command line, otherwise hardcoded
