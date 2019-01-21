@@ -23,12 +23,16 @@ else:
 speeds = vel[data]
 matrices = matrices[data]
 average_matrices = np.mean(matrices, axis=2)
-average_matrices = np.array([list(mobilmean(6,average_matrices[h,:]))
+smooth_matrices = np.array([list(mobilmean(4,average_matrices[h,:]))
                              for h in range(len(speeds))])
-matrices = average_matrices.T/np.max(average_matrices,axis=1)
-jumps_values = shearBand(speeds,matrices.T,plot=False)
+smooth_matrices = average_matrices.T/np.max(average_matrices,axis=1)
+jumps_values = shearBand(speeds,smooth_matrices.T,plot=True)
 
-fig0, ax1 =plt.subplots(1,1)
+matrices = np.array([average_matrices[h,:]
+                            for h in range(len(speeds))])
+matrices = average_matrices.T/np.max(average_matrices,axis=1)
+
+fig0, ax1 =plt.subplots()
 ax1.pcolor(matrices)
 matrices = matrices.T
 c="r"
@@ -40,11 +44,11 @@ fig0.savefig("CorrelationMap.pdf", ext="pdf", dpi=300)
 
 times =([],[],[])
 last_band= int(jumps_values[0,-1]+jumps_values[1,-1]*0.5)
-first_band= int(jumps_values[0,0]+jumps_values[1,0]*0.5)
+first_band= int(jumps_values[0,0]-jumps_values[1,0]*0.5)
 for enum in range(len(data)):
 
-    last_band= int(jumps_values[0,enum]-jumps_values[1,enum]*0.5)
-    first_band= int(jumps_values[0,enum]+jumps_values[1,enum]*0.5)
+    # last_band= int(jumps_values[0,enum]-jumps_values[1,enum]*0.5)
+    # first_band= int(jumps_values[0,enum]+jumps_values[1,enum]*0.5)
     # last_band= int(jumps_values[0,enum]+jumps_values[1,enum]*0.5)
     # first_band= int(jumps_values[0,enum]-jumps_values[1,enum]*0.5)
     # start_space= int(jumps_values[0,enum]+jumps_values[1,enum]*0.5)
@@ -59,9 +63,11 @@ color=["b","r","g"]
 fig, ax2 = plt.subplots()
 LABEL=["solid","shear band","fluid"]
 for index in range(len(times)):
-    ax2.scatter(speeds,times[index], c=color[index], marker="o", label=LABEL[index])
+    ax2.plot(speeds,times[index], c=color[index], marker="o", label=LABEL[index])
     popt, pvar = curve_fit(linear, speeds, times[index])
-    ax2.plot(speeds,[x*popt[0]+popt[1] for x in speeds],c=color[index])
+    # ax2.plot(speeds,[x*popt[0]+popt[1] for x in speeds],c=color[index])
+ax2.semilogx()
+ax2.semilogy()
 ax2.legend()
 
 # fig.savefig("CorrelationTime.pdf", ext="pdf", dpi=300)
