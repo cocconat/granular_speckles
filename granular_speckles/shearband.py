@@ -69,8 +69,8 @@ def shearband_width(data, plot=False):
         return 1./m
     def best_jump_first_maxima(my_jumps):
         for arg, value in zip(my_jumps[:,0], my_jumps[:,1]):
-            if value > 0.55 :
-                return arg
+            if value > 0.65 :
+                return 10
         return int(arg)
 
     mode = "first_maxima"
@@ -120,11 +120,11 @@ def shearband_from_correlation(data, axes=None):
     matrix_jumps = []
     for length, c, mat, speed in zip(best_jump, colors, matrices, speeds):
         jumps = find_jump(int(length), mat)
-        mid_point = np.argmin(jumps)-int(length/2.)
+        mid_point = np.argmin(jumps) -int(length/2.)
         start_point = mid_point + int(length/2.)
         end_point = mid_point - int(length/2.)
-        mid_points[speed] = mid_point
-        start_points[speed] = start_point
+        # mid_points[speed] = mid_point
+        # start_points[speed] = start_point
         # print(length, mid_point)
         matrix_jumps.append(mid_point)
         if axes:
@@ -135,11 +135,10 @@ def shearband_from_correlation(data, axes=None):
             ax2.scatter(start_point, mat[start_point],color=c, marker=".")
             ax2.plot([start_point,end_point],
                            [mat[start_point], mat[end_point]], ls="--",color=c)
-            ax3.scatter(speed, start_point, color=c)
-            ax3.errorbar(speed, start_point, yerr=length, color=c)
-
-    popt, pcov = curve_fit(linear, speeds,
-                           list(start_points.values()),sigma=best_jump)
+            ax3.scatter(speed, mid_point, color=c)
+            ax3.errorbar(speed, mid_point, yerr=length, color=c)
+            ax3.semilogx()
+    popt, pcov = curve_fit(linear, speeds,matrix_jumps)
     if axes:
         ax3.plot(speeds,speeds*popt[0]+popt[1], color="red")
     # return np.array([popt[0], popt[1]])##, pcov[0], pcov[1]]
@@ -152,7 +151,7 @@ def robustezza(matrices, mobmean_range, x_shift_range):
                          x_shift_range[1]-y0,2))
     for x in range(mobmean_range[0], mobmean_range[1]):
         for y in range(x_shift_range[0], x_shift_range[1]):
-            robust[x-x0,y-y0] = shearband_from_correlation(matrices,
+            robust[x-x0,y-y0] = shearband_from_correlation(data,
                                                      mobmean=x, x_shift=y)
     return robust
 
@@ -181,7 +180,7 @@ def shearBand(speeds, matrices, plot=False):
         ax3.set_title("Share band over plate-rotation speed")
         ax3.set_xlabel("Rotating plate speed (m/s)")
         ax3.set_ylabel("Shear band depth (pixels)")
-        matrix_jumps = shearband_from_correlation(matrices,axes=(ax1,ax2,ax3))
+        matrix_jumps = shearband_from_correlation(data,axes=(ax1,ax2,ax3))
         ax1.legend()
         fig.tight_layout()
         fig2.tight_layout()
