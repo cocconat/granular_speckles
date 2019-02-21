@@ -5,7 +5,7 @@
 
 from .video import get_frame_rate, videoToFrame
 from .dataprocess import halfheight, mobilmean
-from .shearband import shearBand
+from .shearband import shearband
 from .cli_parser import getParser
 from .matrix import GetMatrix, correlation
 from .coarsing import coarseSpace, coarseTime, CoarseMatrix
