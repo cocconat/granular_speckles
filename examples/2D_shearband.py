@@ -28,20 +28,23 @@ matrices = np.array([conv_gaussian(matrix, 0.2, 0)
           for matrix in matrices])
 
 # get jump_values distribution for each matrix
-jumps_values = shearband(speeds, matrices, plot=True)
+jumps_values, mid_points= shearband(speeds, matrices, plot=True)
 print(jumps_values)
 
 # matrices = np.array([average_matrices[h, :]
 #                      for h in range(len(speeds))])
 
 fig0, ax1 = plt.subplots()
-ax1.pcolor(matrices.T)
+ax1.pcolormesh(matrices.T)
 c = "r"
 # plt.scatter([ x + 0.5 for x in range(len(data))], , c="r")
+for mat in range(len(data)):
+    ax1.scatter([0.5+ mat]*len(mid_points[mat]), mid_points[mat], color="b", marker ="0")
+   # plt.bar(0.5+ mat, data[row], bar_width, bottom=y_offset, color=colors[row])
+fig0.savefig("CorrelationMap.pdf", ext="pdf", dpi=300)
 ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :], color=c)
 ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :] + jumps_values[1, :] * 0.5, color=c, marker=".")
 ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :] - jumps_values[1, :] * 0.5, color=c, marker=".")
-fig0.savefig("CorrelationMap.pdf", ext="pdf", dpi=300)
 
 times = ([], [], [])
 last_band = int(jumps_values[0, -1] + jumps_values[1, -1] * 0.5)
@@ -73,6 +76,9 @@ ax2.semilogx()
 ax2.legend()
 
 # fig.savefig("CorrelationTime.pdf", ext="pdf", dpi=300)
+fig.show()
+fig0.show()
 plt.show()
+
 
 # clean_matrices = [list(mobilmean(mobmean,x)) for x in average_matrices]

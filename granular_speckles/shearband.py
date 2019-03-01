@@ -108,7 +108,7 @@ def shearband_from_correlation(data, axes=None):
     """
     if axes is not None:
         plot = True
-        ax1, ax2, ax3 = axes
+        ax2, ax3 = axes
 
     def linear(x, m, b):
         return m * x + b
@@ -119,16 +119,18 @@ def shearband_from_correlation(data, axes=None):
     # print(len(best_jump), len(colors), len(scaled_matrices), len(speeds))
     matrix_jumps = []
     sigma_jump = []
+    mid_points = []
     for c, mat, speed in zip(colors, matrices, speeds):
-        jumps = [find_jump(jump, mat) for jump in range(5,18)]
-        mid_point = int(np.mean(np.array(jumps)))
-        sigma = np.var(np.array(jumps))
+        jumps = np.array([[find_jump(jump, mat), jump] for jump in range(7,18)])
+        mid_point = int(np.mean(jumps[:,0]))
+        sigma = mid_point - np.percentile(jumps[:,0],95)
         # mid_point = find_jump(10,mat)
         start_point = int(mid_point + int(sigma))
         end_point = int(mid_point - int(sigma))
         # print(length, mid_point)
         sigma_jump.append(sigma)
         matrix_jumps.append(mid_point)
+        mid_points.append(jumps[:,0])
         if axes:
             # ax1.plot(jumps / np.min(jumps), ls="--", alpha=0.5, color=c)
             ax2.plot(mat, label=speed, color=c)
@@ -144,7 +146,7 @@ def shearband_from_correlation(data, axes=None):
     if axes:
         ax3.plot(speeds, speeds * popt[0] + popt[1], color="red")
     # return np.array([popt[0], popt[1]])##, pcov[0], pcov[1]]
-    return matrix_jumps, sigma_jump
+    return matrix_jumps, sigma_jump, mid_points
 
 
 def robustezza(matrices, mobmean_range, x_shift_range):
@@ -169,29 +171,25 @@ def shearband(speeds, matrices, plot=False):
     # best_jump, jump_params = shearband_width(data, plot)
     # data["best_jump"] = best_jump
     # data["jump_params"] = jump_params
-    matrix_jumps, sigma_jump = shearband_from_correlation(data)
+    matrix_jumps, sigma_jump, mid_points = shearband_from_correlation(data)
     plot = False
     if plot:
-        fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, sharey=True)
-        fig2, (ax3, ax4) = plt.subplots(2, 1)
-        ax1.set_title("Correlation algorithm 1")
-        ax1.set_xlabel("Distance from bottom (pixel)")
-        ax1.set_ylabel("Scaled correlation time (frame/rate)")
+        fig, ax3 = plt.subplots(1, 1)
+        fig2, ax2 = plt.subplots(1,1 )
         ax2.set_title("Correlation algorithm 2")
         # ax2.set_xlabel("Distance from bottom (pixel)")
         # ax2.set_ylabel("Scaled correlation time (frame/rate)")
-        ax3.set_title("Share band over plate-rotation speed")
-        ax3.set_xlabel("Rotating plate speed (m/s)")
-        ax3.set_ylabel("Shear band depth (pixels)")
-        matrix_jumps = shearband_from_correlation(data, axes=(ax1, ax2, ax3))
-        ax1.legend()
+        ax2.set_title("Share band over plate-rotation speed")
+        ax2.set_xlabel("Rotating plate speed (m/s)")
+        ax2.set_ylabel("Shear band depth (pixels)")
+        shearband_from_correlation(data, axes=(ax2, ax3))
         fig.tight_layout()
         fig2.tight_layout()
-        # shearband_from_correlation(matrices2,ax2)
-        plt.legend()
-        plt.show()
+        fig2.legend()
+        # fig2.show()
+        # fig.show()
 
-    return np.array([matrix_jumps, sigma_jump, speeds])
+    return np.array([matrix_jumps, sigma_jump, speeds]), mid_points
 
 # if False:
 #     fig3, ax5 = plt.subplots(1, 1)
