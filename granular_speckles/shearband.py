@@ -108,7 +108,9 @@ def shearband_from_correlation(data, axes=None):
     """
     if axes is not None:
         plot = True
-        ax2, ax3 = axes
+        axes2, ax3 = axes
+    else:
+        axes2 = [""]*len(data["colors"])
 
     def linear(x, m, b):
         return m * x + b
@@ -120,25 +122,30 @@ def shearband_from_correlation(data, axes=None):
     matrix_jumps = []
     sigma_jump = []
     mid_points = []
-    for c, mat, speed in zip(colors, matrices, speeds):
-        jumps = np.array([[find_jump(jump, mat), jump] for jump in range(7,18)])
-        mid_point = int(np.mean(jumps[:,0]))
-        sigma = mid_point - np.percentile(jumps[:,0],95)
+    for ax2, c, mat, speed in zip(axes2, colors, matrices, speeds):
+        jumps = np.array([find_jump(jump, mat) for jump in range(7,18)])
+        mid_point = int(np.mean(jumps))
+        sigma = abs(mid_point - np.percentile(jumps,100))
+
+        jumps = [mid for mid in jumps if abs(mid_point - mid) < sigma + 3]
+        sigma = abs(mid_point - np.percentile(jumps,100))
+        mid_point = int(np.mean(jumps))
         # mid_point = find_jump(10,mat)
         start_point = int(mid_point + int(sigma))
         end_point = int(mid_point - int(sigma))
         # print(length, mid_point)
         sigma_jump.append(sigma)
         matrix_jumps.append(mid_point)
-        mid_points.append(jumps[:,0])
+        mid_points.append(jumps)
         if axes:
             # ax1.plot(jumps / np.min(jumps), ls="--", alpha=0.5, color=c)
-            ax2.plot(mat, label=speed, color=c)
+            ax2.plot(mat, label=str(speed)+" m/s", color=c)
             ax2.scatter(mid_point, mat[mid_point], color=c)
             ax2.scatter(end_point, mat[end_point], color=c, marker=".")
             ax2.scatter(start_point, mat[start_point], color=c, marker=".")
             ax2.plot([start_point, end_point],
-                     [mat[start_point], mat[end_point]], ls="--", color=c)
+                     [mat[mid_point], mat[mid_point]], ls="--", color=c)
+            ax2.bar(mid_point,1,abs(start_point-end_point),color=c, alpha=0.60)
             ax3.scatter(speed, mid_point, color=c)
             ax3.errorbar(speed, mid_point, yerr=sigma, color=c)
             ax3.semilogx()
@@ -172,17 +179,18 @@ def shearband(speeds, matrices, plot=False):
     # data["best_jump"] = best_jump
     # data["jump_params"] = jump_params
     matrix_jumps, sigma_jump, mid_points = shearband_from_correlation(data)
-    plot = False
+    plot = True
     if plot:
         fig, ax3 = plt.subplots(1, 1)
-        fig2, ax2 = plt.subplots(1,1 )
-        ax2.set_title("Correlation algorithm 2")
+        fig2, axes2 = plt.subplots(len(colors),1, sharex=True)
+        axes2[0].set_title("Shear band recognition")
+        axes2[-1].set_xlabel("Distance from top of the well (metapixel)")
         # ax2.set_xlabel("Distance from bottom (pixel)")
         # ax2.set_ylabel("Scaled correlation time (frame/rate)")
-        ax2.set_title("Share band over plate-rotation speed")
-        ax2.set_xlabel("Rotating plate speed (m/s)")
-        ax2.set_ylabel("Shear band depth (pixels)")
-        shearband_from_correlation(data, axes=(ax2, ax3))
+        ax3.set_title("Share band over plate-rotation speed")
+        ax3.set_xlabel("Rotating plate speed (m/s)")
+        ax3.set_ylabel("Shear band depth (metapixels)")
+        shearband_from_correlation(data, axes=(axes2, ax3))
         fig.tight_layout()
         fig2.tight_layout()
         fig2.legend()

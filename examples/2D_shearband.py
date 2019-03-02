@@ -39,12 +39,16 @@ ax1.pcolormesh(matrices.T)
 c = "r"
 # plt.scatter([ x + 0.5 for x in range(len(data))], , c="r")
 for mat in range(len(data)):
-    ax1.scatter([0.5+ mat]*len(mid_points[mat]), mid_points[mat], color="b", marker ="0")
-   # plt.bar(0.5+ mat, data[row], bar_width, bottom=y_offset, color=colors[row])
-fig0.savefig("CorrelationMap.pdf", ext="pdf", dpi=300)
+    ax1.scatter([0.5+ mat]*len(mid_points[mat]), mid_points[mat], facecolors='none', edgecolors='b')
+# plt.bar(0.5+ mat, data[row], bar_width, bottom=y_offset, color=colors[row])
 ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :], color=c)
-ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :] + jumps_values[1, :] * 0.5, color=c, marker=".")
-ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :] - jumps_values[1, :] * 0.5, color=c, marker=".")
+ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :] + jumps_values[1, :], color=c, marker=".")
+ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :] - jumps_values[1, :], color=c, marker=".")
+
+ax1.set_title("Correlation time vs rotation speed")
+ax1.set_ylabel("distance from top of the well (metapixel)")
+ax1.set_xlabel("Increasing rotation speed")
+fig0.savefig("CorrelationMap.pdf", ext="pdf", dpi=300)
 
 times = ([], [], [])
 last_band = int(jumps_values[0, -1] + jumps_values[1, -1] * 0.5)
@@ -70,7 +74,10 @@ LABEL = ["solid", "shear band", "fluid"]
 for index in range(len(times)):
     ax2.plot(speeds, times[index], c=color[index], marker="o", label=LABEL[index])
     popt, pvar = curve_fit(linear, speeds, times[index])
-    # ax2.plot(speeds,[x*popt[0]+popt[1] for x in speeds],c=color[index])
+    # axg2.plot(speeds,[x*popt[0]+popt[1] for x in speeds],c=color[index])
+ax2.set_title("Correlation time averaged over granular phases")
+ax2.set_ylabel("Normalized correlation time")
+ax2.set_xlabel("Speed of rotating plate")
 ax2.semilogx()
 # ax2.semilogy()
 ax2.legend()
