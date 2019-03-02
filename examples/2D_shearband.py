@@ -35,7 +35,7 @@ print(jumps_values)
 #                      for h in range(len(speeds))])
 
 fig0, ax1 = plt.subplots()
-ax1.pcolormesh(matrices.T)
+pc = ax1.pcolormesh(matrices.T)
 c = "r"
 # plt.scatter([ x + 0.5 for x in range(len(data))], , c="r")
 for mat in range(len(data)):
@@ -48,6 +48,11 @@ ax1.scatter([x + 0.5 for x in range(len(data))], jumps_values[0, :] - jumps_valu
 ax1.set_title("Correlation time vs rotation speed")
 ax1.set_ylabel("distance from top of the well (metapixel)")
 ax1.set_xlabel("Increasing rotation speed")
+cbar = plt.colorbar(pc)
+cbar.ax.get_yaxis().set_ticks([0,1])
+cbar.ax.set_yticklabels(['0','1'])
+cbar.set_label("Normalized corr. time", rotation=270)
+fig0.tight_layout()
 fig0.savefig("CorrelationMap.pdf", ext="pdf", dpi=300)
 
 times = ([], [], [])
