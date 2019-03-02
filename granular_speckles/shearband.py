@@ -183,7 +183,7 @@ def shearband(speeds, matrices, plot=False):
     if plot:
         fig, ax3 = plt.subplots(1, 1)
         fig2, axes2 = plt.subplots(len(colors),1, sharex=True)
-        axes2[0].set_title("Shear band recognition")
+        axes2[0].set_title("Shear band detection")
         axes2[-1].set_xlabel("Distance from top of the well (metapixel)")
         # ax2.set_xlabel("Distance from bottom (pixel)")
         # ax2.set_ylabel("Scaled correlation time (frame/rate)")
